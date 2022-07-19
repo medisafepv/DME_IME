@@ -133,8 +133,12 @@ def process_source(uploader):
     
     1.1 Added clean list value functionality
     1.2 Removed rows with empty string
+    1.3 Prevented reselection if any NaN values present
     '''
     df = read_excel_raw(uploader)
+    
+    # Drop empty rows at end, if any
+    df = df[df.columns].dropna(how="all")
     
     # remove leading/trailing whitespace in column names
     df.columns = clean_list(df.columns)
@@ -142,16 +146,21 @@ def process_source(uploader):
     cols = source_identify(df.columns)
     
     while df[cols[1]].isna().any():
-        # If any are NaN values, reselect
+        # If any are NaN values in significant column, reselect
         print("{}컬럼이 비어있습니다. 다시 선택하세요.".format(cols[1]))
         subset = list(df.columns)
         subset.remove(cols[1])
         cols = source_identify(subset)
     
-    # (v.1.1) remove leading/trailing whitespace in MedDRA PT values
-    df[cols[1]] = clean_list(list(df[cols[1]]))
+    try:
+        # Signficiant column is LLT term or WHO-ART (str), so no type error
+        df[cols[1]] = clean_list(list(df[cols[1]])) 
+    except AttributeError:
+        print("Source 파일 컬럼이 숫자로 인식.")
+        print("종료.")
+        raise StopExecution
     
-    # remove rows with empty string
+    # Remove rows with empty string, if exists after cleaning
     df = df[df[cols[1]].astype(bool)] 
     
     if "" in cols:
@@ -163,9 +172,10 @@ def process_source(uploader):
         
         new_cols = ["Row Number", cols[1]]
         
-        return df[new_cols].dropna(how="all", subset=[cols[1]]), new_cols
+        return df[new_cols], new_cols
     else:
-        return df[cols].dropna(how="all", subset=cols), cols
+        return df[cols], cols
+    
     
 def find_match(data, data_cols, ime, dme):
     '''
