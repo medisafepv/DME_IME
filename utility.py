@@ -182,16 +182,18 @@ def find_match(data, data_cols, ime, dme):
     data : source dataframe
     ime : IME set
     dme : DME set
+    
+    1.1 : Standardized capitalization
     '''
     DME_bool = list()
     IME_bool = list()
     for PT in data[data_cols[1]]:
-        if PT in dme:
+        if PT.lower() in set(pd.Series(list(dme)).str.lower()):
             DME_bool.append(True)
         else:
             DME_bool.append(False)
 
-        if PT in ime:
+        if PT.lower() in set(pd.Series(list(ime)).str.lower()):
             IME_bool.append(True)
         else:
             IME_bool.append(False)
