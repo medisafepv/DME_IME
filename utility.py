@@ -1,3 +1,12 @@
+'''
+final_PT program
+
+Author: Sion Kim
+Contact: sionkim@umich.edu
+Latest Edit: 07/29/2022
+'''
+
+# Libraries
 import io
 import re
 import pandas as pd
@@ -5,10 +14,17 @@ import ipywidgets as widgets
 from ipywidgets import HBox, VBox, FileUpload, Layout
 
 class StopExecution(Exception):
+    '''
+    Silently halts cell execution
+    '''
     def _render_traceback_(self):
         pass
     
 def prompt_upload(description):
+    '''
+    Prompts use to upload a file by ipywidget. Returns instance of FileUpload. 
+    - description : string desciption for file upload widget
+    '''
     uploader = FileUpload(description=description, layout=Layout(width="250px"), multiple=False)
     display(uploader)
 
@@ -24,7 +40,6 @@ def prompt_upload(description):
 
 def clean_list(list_in):
     '''
-    Helper function for identifying columns in AE list file
     Removes trailing and leading whitespace from each string element in list
     Maintains order
     '''
@@ -35,6 +50,11 @@ def clean_list(list_in):
     return new_list
 
 def manual_identification(columns, missing, filename):
+    '''
+    Adapted from final_WM program, utility.py 
+        Similar behaviour with minor comment changes 
+    '''
+        
     print("*" * 40)
     print("{} 파일에서 '{}'을 찾지 못했습니다.".format(filename, missing))
     print("{} 파일 제목:".format(filename))
@@ -61,6 +81,10 @@ def manual_identification(columns, missing, filename):
 
 
 def confirmation(actual, test):
+    '''
+    Copied from final_WM program, utility.py 
+    '''
+        
     response = input("'{}'이 {} 인지 확인 (y/n): ".format(test, actual))
     while response != "y" and response != "n":
         response = input("'{}'이 {} 인지 다시 확인 (y/n): ".format(test, actual))
@@ -72,7 +96,7 @@ def confirmation(actual, test):
 def source_identify(columns):
     '''
     Helper function for identifying columns in source data file
-    Returns [case number, meddra pt] in specified order
+    Returns [<Case Number>, <Meddra PT>] in specified order
     '''
     print("=" * 40)
     print("Source data file")
@@ -129,7 +153,7 @@ def process_IME(uploader):
 
 def process_source(uploader):
     '''
-    Adapted from process_ae() function in final_WM
+    Adapted from process_ae function in final_WM program
     
     1.1 Added clean list value functionality
     1.2 Removed rows with empty string
@@ -179,6 +203,8 @@ def process_source(uploader):
     
 def find_match(data, data_cols, ime, dme):
     '''
+    Identifies whether PT in data, column specified data_cols, is in ime or dme
+    
     data : source dataframe
     ime : IME set
     dme : DME set
